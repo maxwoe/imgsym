@@ -1,0 +1,264 @@
+{
+  "backbones": [
+    "vit_tiny_patch16_224.augreg_in21k_ft_in1k",
+    "vit_base_patch16_224.augreg_in21k_ft_in1k",
+    "efficientvit_b0.r224_in1k",
+    "efficientvit_b3.r224_in1k",
+    "convnextv2_atto.fcmae_ft_in1k",
+    "convnextv2_base.fcmae_ft_in22k_in1k",
+    "efficientnetv2_rw_t.ra2_in1k",
+    "efficientnetv2_rw_m.agc_in1k",
+    "mambaout_tiny.in1k",
+    "mambaout_base.in1k",
+    "focalnet_tiny_lrf.ms_in1k",
+    "focalnet_base_lrf.ms_in1k",
+    "edgenext_xx_small.in1k",
+    "edgenext_base.in21k_ft_in1k",
+    "swin_tiny_patch4_window7_224",
+    "swin_base_patch4_window7_224"
+  ],
+  "n_images": 40,
+  "subset": "hard",
+  "results": {
+    "vit_tiny_patch16_224.augreg_in21k_ft_in1k": {
+      "n_stages": 3,
+      "stage_skills": [
+        0.39166666666666683,
+        0.38749999999999996,
+        0.3916666666666666
+      ],
+      "best_stage": 0,
+      "best_skill": 0.39166666666666683,
+      "best_ci": [
+        0.19572916666666665,
+        0.5708333333333333
+      ]
+    },
+    "vit_base_patch16_224.augreg_in21k_ft_in1k": {
+      "n_stages": 3,
+      "stage_skills": [
+        0.6083333333333332,
+        0.5874999999999999,
+        0.5291666666666666
+      ],
+      "best_stage": 0,
+      "best_skill": 0.6083333333333332,
+      "best_ci": [
+        0.45822916666666663,
+        0.7417708333333333
+      ]
+    },
+    "efficientvit_b0.r224_in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.4833333333333334,
+        0.5958333333333334,
+        0.6916666666666664,
+        0.7083333333333333
+      ],
+      "best_stage": 3,
+      "best_skill": 0.7083333333333333,
+      "best_ci": [
+        0.6000000000000001,
+        0.8125
+      ]
+    },
+    "efficientvit_b3.r224_in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.5791666666666666,
+        0.6291666666666664,
+        0.6833333333333336,
+        0.7208333333333332
+      ],
+      "best_stage": 3,
+      "best_skill": 0.7208333333333332,
+      "best_ci": [
+        0.6291666666666669,
+        0.8125
+      ]
+    },
+    "convnextv2_atto.fcmae_ft_in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.5958333333333332,
+        0.7208333333333337,
+        0.6375,
+        0.6416666666666664
+      ],
+      "best_stage": 1,
+      "best_skill": 0.7208333333333337,
+      "best_ci": [
+        0.6166666666666667,
+        0.8125
+      ]
+    },
+    "convnextv2_base.fcmae_ft_in22k_in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.5958333333333332,
+        0.6666666666666665,
+        0.44999999999999996,
+        0.5958333333333332
+      ],
+      "best_stage": 1,
+      "best_skill": 0.6666666666666665,
+      "best_ci": [
+        0.5125,
+        0.7958333333333332
+      ]
+    },
+    "efficientnetv2_rw_t.ra2_in1k": {
+      "n_stages": 5,
+      "stage_skills": [
+        0.4125000000000001,
+        0.5624999999999998,
+        0.6458333333333335,
+        0.7250000000000001,
+        0.6541666666666663
+      ],
+      "best_stage": 3,
+      "best_skill": 0.7250000000000001,
+      "best_ci": [
+        0.625,
+        0.8208333333333333
+      ]
+    },
+    "efficientnetv2_rw_m.agc_in1k": {
+      "n_stages": 5,
+      "stage_skills": [
+        0.4833333333333334,
+        0.5458333333333332,
+        0.6541666666666663,
+        0.675,
+        0.675
+      ],
+      "best_stage": 3,
+      "best_skill": 0.675,
+      "best_ci": [
+        0.5458333333333334,
+        0.8001041666666666
+      ]
+    },
+    "mambaout_tiny.in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.7166666666666663,
+        0.6791666666666665,
+        0.6041666666666667,
+        0.5916666666666666
+      ],
+      "best_stage": 0,
+      "best_skill": 0.7166666666666663,
+      "best_ci": [
+        0.5998958333333332,
+        0.825
+      ]
+    },
+    "mambaout_base.in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.6583333333333332,
+        0.6791666666666667,
+        0.5708333333333333,
+        0.6083333333333336
+      ],
+      "best_stage": 1,
+      "best_skill": 0.6791666666666667,
+      "best_ci": [
+        0.5333333333333334,
+        0.7958333333333336
+      ]
+    },
+    "focalnet_tiny_lrf.ms_in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.625,
+        0.6875,
+        0.7041666666666664,
+        0.5708333333333333
+      ],
+      "best_stage": 2,
+      "best_skill": 0.7041666666666664,
+      "best_ci": [
+        0.5625,
+        0.8208333333333335
+      ]
+    },
+    "focalnet_base_lrf.ms_in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.6583333333333337,
+        0.6708333333333332,
+        0.4958333333333331,
+        0.5083333333333333
+      ],
+      "best_stage": 1,
+      "best_skill": 0.6708333333333332,
+      "best_ci": [
+        0.55,
+        0.7791666666666668
+      ]
+    },
+    "edgenext_xx_small.in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.6000000000000001,
+        0.6666666666666665,
+        0.6583333333333332,
+        0.5583333333333333
+      ],
+      "best_stage": 1,
+      "best_skill": 0.6666666666666665,
+      "best_ci": [
+        0.5333333333333334,
+        0.7833333333333332
+      ]
+    },
+    "edgenext_base.in21k_ft_in1k": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.6208333333333336,
+        0.5874999999999999,
+        0.6333333333333333,
+        0.6416666666666664
+      ],
+      "best_stage": 3,
+      "best_skill": 0.6416666666666664,
+      "best_ci": [
+        0.5125,
+        0.7625
+      ]
+    },
+    "swin_tiny_patch4_window7_224": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.6041666666666667,
+        0.6666666666666665,
+        0.4624999999999999,
+        0.5916666666666668
+      ],
+      "best_stage": 1,
+      "best_skill": 0.6666666666666665,
+      "best_ci": [
+        0.5414583333333332,
+        0.7875000000000001
+      ]
+    },
+    "swin_base_patch4_window7_224": {
+      "n_stages": 4,
+      "stage_skills": [
+        0.6083333333333336,
+        0.6666666666666667,
+        0.4083333333333332,
+        0.4458333333333333
+      ],
+      "best_stage": 1,
+      "best_skill": 0.6666666666666667,
+      "best_ci": [
+        0.5373958333333332,
+        0.7875000000000001
+      ]
+    }
+  }
+}

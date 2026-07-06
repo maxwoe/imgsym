@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imgsym"
+version = "0.1.0"
+description = "Image symmetry detection and measurement toolkit"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    {name = "Maximilian Wöhrer"},
+]
+keywords = ["symmetry", "image-processing", "computer-vision", "symmetry-detection", "symmetry-measurement"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "numpy>=1.22",
+    "opencv-python-headless>=4.5,<5",  # OpenCV 5.0 removed cv2.HOGDescriptor (hog/phog scorers)
+    "scipy>=1.8",
+    "scikit-image>=0.19",
+    "matplotlib>=3.5",
+]
+
+[project.optional-dependencies]
+deep = [
+    "torch>=1.12",
+    "torchvision>=0.13",
+    "timm>=0.9",
+    "scikit-learn>=1.0",
+]
+wavelets = [
+    "phasepack",
+]
+fast = [
+    "numba>=0.56",
+]
+all = [
+    "imgsym[deep,wavelets,fast]",
+]
+test = [
+    "pytest>=7",
+]
+
+[project.urls]
+Homepage = "https://github.com/maxwoe/imgsym"
+Repository = "https://github.com/maxwoe/imgsym"
+Issues = "https://github.com/maxwoe/imgsym/issues"
+
+[tool.setuptools.packages.find]
+include = ["imgsym*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

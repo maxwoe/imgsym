@@ -1,0 +1,21 @@
+=== 1. RANKING STABILITY across datasets (Spearman of method-skill vectors) ===
+    mean pairwise rank-corr = 0.836 (min 0.725)  -> moderately stable
+
+=== 2. COMPLEMENTARITY (per-image success correlation; low = complementary) ===
+     deep_fe alexnet     hog   gabor gradien local_g
+deep_features          +1.00   +0.78   +0.46   +0.53   +0.52   +0.40
+alexnet                +0.78   +1.00   +0.49   +0.64   +0.54   +0.50
+hog                    +0.46   +0.49   +1.00   +0.46   +0.36   +0.38
+gabor                  +0.53   +0.64   +0.46   +1.00   +0.53   +0.42
+gradient               +0.52   +0.54   +0.36   +0.53   +1.00   +0.32
+local_global           +0.40   +0.50   +0.38   +0.42   +0.32   +1.00
+
+=== 3. ENSEMBLE (rank-combine; does it beat the best single?) ===
+    best single: deep_features = +0.819
+    deep_features+alexnet                              = +0.819  (+0.000 vs best)
+    deep_features+alexnet+hog                          = +0.840  (+0.021 vs best)
+    deep_features+hog                                  = +0.833  (+0.014 vs best)
+    deep_features+hog+gabor                            = +0.827  (+0.008 vs best)
+    deep_features+hog+weighted_binary                  = +0.811  (-0.007)
+    deep_features+alexnet+hog+gabor+gradient           = +0.821  (+0.002 vs best)
+    deep_features+alexnet+hog+gabor+gradient+local_global+multi_scale_gradient+sliding_window+pixel_correlation+phog+dct+weighted_binary+eros = +0.794  (-0.024)

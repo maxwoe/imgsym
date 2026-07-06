@@ -1,0 +1,47 @@
+=== 1. SENSITIVITY: skill vs perturbation magnitude (pooled; 0=chance, 1=perfect) ===
+    finer perturbations on the left -> where methods reveal their precision limit
+    (direction fixed per method from the standard pool)
+
+method                 0.5%     1%     2%     3%     5%    10%  ||   0.5d     1d     2d     3d     5d    10d
+deep_features         +0.24  +0.45  +0.73  +0.84  +0.88  +0.91  ||  +0.18  +0.28  +0.52  +0.62  +0.78  +0.88
+alexnet               +0.23  +0.46  +0.69  +0.82  +0.87  +0.90  ||  +0.18  +0.28  +0.50  +0.62  +0.73  +0.85
+hog                   +0.18  +0.41  +0.67  +0.80  +0.86  +0.87  ||  +0.09  +0.20  +0.45  +0.59  +0.75  +0.87
+gabor                 +0.16  +0.38  +0.58  +0.68  +0.79  +0.86  ||  +0.08  +0.20  +0.39  +0.47  +0.60  +0.77
+gradient              +0.13  +0.35  +0.60  +0.71  +0.75  +0.79  ||  +0.05  +0.12  +0.33  +0.41  +0.59  +0.68
+local_global          +0.12  +0.30  +0.52  +0.66  +0.74  +0.76  ||  +0.03  +0.14  +0.33  +0.41  +0.55  +0.68
+multi_scale_gradient  +0.14  +0.31  +0.59  +0.68  +0.73  +0.72  ||  +0.09  +0.17  +0.33  +0.42  +0.57  +0.68
+sliding_window        +0.18  +0.35  +0.55  +0.63  +0.70  +0.72  ||  +0.08  +0.21  +0.38  +0.48  +0.59  +0.67
+pixel_correlation     +0.17  +0.36  +0.54  +0.61  +0.67  +0.71  ||  +0.10  +0.22  +0.40  +0.48  +0.59  +0.69
+phog                  +0.12  +0.24  +0.40  +0.52  +0.61  +0.73  ||  +0.14  +0.21  +0.37  +0.46  +0.62  +0.77
+dct                   +0.15  +0.33  +0.53  +0.59  +0.65  +0.69  ||  +0.06  +0.18  +0.34  +0.44  +0.55  +0.64
+weighted_binary       +0.14  +0.30  +0.50  +0.57  +0.60  +0.57  ||  +0.09  +0.16  +0.35  +0.41  +0.56  +0.65
+eros                  +0.15  +0.23  +0.40  +0.45  +0.46  +0.43  ||  +0.01  +0.02  +0.07  +0.09  +0.06  -0.03
+
+=== 2. LOCAL vs GLOBAL skill (pooled) (coincident negatives excluded) ===
+    local = precise localization (hard);  global = reject gross alternatives (easy)
+
+method                 local  global
+deep_features          +0.61   +0.88
+alexnet                +0.59   +0.91
+hog                    +0.56   +0.88
+gabor                  +0.50   +0.79
+gradient               +0.46   +0.57
+local_global           +0.44   +0.29
+multi_scale_gradient   +0.45   +0.75
+sliding_window         +0.46   +0.72
+pixel_correlation      +0.46   +0.61
+phog                   +0.43   +0.56
+dct                    +0.43   +0.61
+weighted_binary        +0.41   +0.38
+eros                   +0.19   +0.09
+    (450/8016 global negatives excluded as near-coincident with the true axis)
+
+=== 3. PAIRED significance (pooled, standard local; CI excludes 0 => significant) ===
+    paired bootstrap on the SAME images -- more powerful than CI overlap
+
+  deep_features        - alexnet              = +0.016 [+0.001, +0.032]  SIGNIFICANT
+  deep_features        - hog                  = +0.031 [+0.007, +0.055]  SIGNIFICANT
+  alexnet              - hog                  = +0.015 [-0.011, +0.039]  n.s.
+  hog                  - gabor                = +0.092 [+0.064, +0.118]  SIGNIFICANT
+  gabor                - gradient             = +0.041 [+0.012, +0.071]  SIGNIFICANT
+  gradient             - local_global         = +0.022 [-0.014, +0.059]  n.s.

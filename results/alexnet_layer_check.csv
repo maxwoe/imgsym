@@ -1,0 +1,4 @@
+config,symComp17_s_skill,NYU_s_skill,PIX2PER-art_skill,PIX2PER-nat_skill,mean_skill,pooled_local,pooled_global
+conv1_p17_ours,0.8416,0.8977,0.6651,0.7498,0.7886,0.5751,0.7962
+conv2_p17,0.8485,0.9260,0.7077,0.7751,0.8143,0.6008,0.9061
+conv2_p9,0.8551,0.9008,0.7113,0.7708,0.8095,0.5937,0.9106

@@ -27,7 +27,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from imgsym.evaluation import discrimination_skill
-from imgsym.evaluation.scoring_metrics import infer_direction
+from imgsym.evaluation.scoring_metrics import infer_direction, discrimination_one_sided
 
 PAPER = os.path.join("..", "image-symmetry-scoring-paper")
 FIG, DATA, TAB = (os.path.join(PAPER, d) for d in ("figures", "data", "tables"))
@@ -84,12 +84,57 @@ def load_disc(path):
     return out, dss
 
 
+def _nat_before_art(dss):
+    """Display order: PIX2PER-nat before PIX2PER-art (photo datasets first, art last)."""
+    out = [d for d in dss if d != "PIX2PER-art"]
+    return out + ["PIX2PER-art"] if "PIX2PER-art" in dss else out
+
+
 single, DS_S = load_disc("results/discrimination.csv")
 multi, DS_M = load_disc("results/discrimination_multi.csv")
+DS_S, DS_M = _nat_before_art(DS_S), _nat_before_art(DS_M)
 methods = list(single)
 mean_s = {m: float(np.mean([single[m][d][0] for d in DS_S])) for m in methods}
 mean_m = {m: float(np.mean([multi[m][d][0] for d in DS_M])) for m in methods}
 order = sorted(methods, key=lambda m: mean_s[m], reverse=True)        # by single skill
+
+
+# --- 95% bootstrap CIs on the mean-across-datasets skill (per method) --------
+# Mirrors discrimination_skill_ci at the mean level: per dataset, the score
+# direction is fixed once from the full standard pool, per-unit one-sided AUC
+# values are precomputed (skill = 2*mean - 1 over units), and the bootstrap
+# resamples units WITHIN each dataset, averaging dataset skills per replicate.
+def _mean_skill_cis(pi_path, dss, n_boot=2000, seed=42):
+    blob = json.load(open(pi_path))
+    tags = set(blob["meta"]["std_tags"])
+    data = blob["data"]
+    out = {}
+    rng = np.random.RandomState(seed)
+    for m in methods:
+        units_per_ds = []
+        for ds in dss:
+            recs = data[ds][m]
+            pairs = []
+            for r in recs:
+                ws = [s for t, s in r["wrong"] if t in tags and s is not None]
+                if ws and r["true"] is not None:
+                    pairs.append((r["true"], ws))
+            hib = infer_direction([t for t, _ in pairs],
+                                  [x for _, w in pairs for x in w])
+            units_per_ds.append(np.array(
+                [discrimination_one_sided(t, w, hib) for t, w in pairs]))
+        boots = np.zeros(n_boot)
+        for u in units_per_ds:
+            idx = rng.randint(0, len(u), size=(n_boot, len(u)))
+            boots += 2.0 * np.nanmean(u[idx], axis=1) - 1.0
+        boots /= len(units_per_ds)
+        out[m] = (float(np.percentile(boots, 2.5)),
+                  float(np.percentile(boots, 97.5)))
+    return out
+
+
+ci_s = _mean_skill_cis("results/per_image_scores.json", DS_S)
+ci_m = _mean_skill_cis("results/per_image_scores_multi.json", DS_M)
 
 
 # --- FIG 1: single-axis leaderboard (mean skill; whiskers = per-dataset range) ---
@@ -189,7 +234,7 @@ axes[0].plot([], [], color=CONTEXT, lw=0.9, label="hierarchical backbones (14)")
 axes[0].plot([], [], color=C_DEEP, lw=1.8, marker="o", ms=3.4,
              label="MambaOut-Base (DeepFeat default)")
 axes[0].plot([], [], color="#3B3B3B", ls=(0, (4, 2)), lw=1.5, marker="o", ms=3.6,
-             mfc="white", label="columnar ViT (2)")
+             mfc="white", label="columnar ViT (3)")
 axes[0].legend(frameon=False, loc="lower left")
 fig.savefig(os.path.join(FIG, "fig_stage_ablation.pdf"))
 plt.close(fig)
@@ -387,10 +432,12 @@ else:
 # --- derived data CSV + LaTeX leaderboard table ---
 with open(os.path.join(DATA, "leaderboard.csv"), "w", newline="") as fh:
     w = csv.writer(fh)
-    w.writerow(["method", "single_mean", "multi_mean"]
+    w.writerow(["method", "single_mean", "single_lo", "single_hi",
+                "multi_mean", "multi_lo", "multi_hi"]
                + [f"single_{d}" for d in DS_S] + [f"multi_{d}" for d in DS_M])
     for m in order:
-        w.writerow([m, f"{mean_s[m]:.3f}", f"{mean_m[m]:.3f}"]
+        w.writerow([m, f"{mean_s[m]:.3f}", f"{ci_s[m][0]:.3f}", f"{ci_s[m][1]:.3f}",
+                    f"{mean_m[m]:.3f}", f"{ci_m[m][0]:.3f}", f"{ci_m[m][1]:.3f}"]
                    + [f"{single[m][d][0]:.3f}" for d in DS_S]
                    + [f"{multi[m][d][0]:.3f}" for d in DS_M])
 
@@ -401,8 +448,77 @@ with open(os.path.join(TAB, "tab_leaderboard.tex"), "w") as fh:
     for m in order:
         nm = disp(m).replace("_", "\\_")
         bold = "\\textbf{%s}" if m in HI else "%s"
-        fh.write(f"{bold % nm} & {mean_s[m]:+.2f} & {mean_m[m]:+.2f}\\\\\n")
+        cs = f"{mean_s[m]:+.2f} [{ci_s[m][0]:+.2f}, {ci_s[m][1]:+.2f}]"
+        cm = f"{mean_m[m]:+.2f} [{ci_m[m][0]:+.2f}, {ci_m[m][1]:+.2f}]"
+        fh.write(f"{bold % nm} & {cs} & {cm}\\\\\n")
     fh.write("\\bottomrule\n\\end{tabularx}\n")
+
+
+# --- Appendix table: per-dataset skill [95% CI], 13 methods x 9 datasets ---
+def _ds_disp(d):
+    return d[:-2] if d.endswith(("_s", "_m")) else d
+
+
+with open(os.path.join(TAB, "tab_perdataset.tex"), "w") as fh:
+    fh.write("% auto-generated by scripts/make_paper_figures.py\n")
+    for label, res, dss in (("Single-axis protocol", single, DS_S),
+                            ("Multi-axis protocol", multi, DS_M)):
+        fh.write("\\begin{tabularx}{\\fulllength}{l" + "C" * len(dss) + "}\n\\toprule\n")
+        fh.write(f"\\textbf{{{label}}}"
+                 + "".join(f" & \\textbf{{{_ds_disp(d)}}}" for d in dss) + "\\\\\n\\midrule\n")
+        for m in order:
+            nm = disp(m).replace("_", "\\_")
+            bold = "\\textbf{%s}" if m in HI else "%s"
+            cells = []
+            for d in dss:
+                sk, lo, hi, _ = res[m][d]
+                cells.append(f"{sk:+.2f} [{lo:+.2f}, {hi:+.2f}]")
+            fh.write(f"{bold % nm} & " + " & ".join(cells) + "\\\\\n")
+        fh.write("\\bottomrule\n\\end{tabularx}\n")
+        if label.startswith("Single"):
+            fh.write("\\\\[6pt]\n")
+print("  + tab_perdataset.tex")
+
+
+# --- Main-text table: degradation robustness (all 13 methods, mean over the four
+#     single-axis datasets = the leaderboard's protocol and aggregation) ---
+DEG_PATH = "results/degradation_full.csv"
+if os.path.exists(DEG_PATH):
+    rows = list(csv.DictReader(open(DEG_PATH)))
+    per_ds = {}
+    for r in rows:
+        per_ds[(r["method"], r["dataset"], r["family"], r["level"])] = (
+            float(r["skill"]), float(r["lo"]), float(r["hi"]))
+    deg_ds = [d for d in DS_S if any(k[1] == d for k in per_ds)]
+    conds = [("clean", "0")] + [(f, lv) for f in ("blur", "noise", "jpeg", "occl")
+                                for lv in {"blur": ("1", "2", "4"),
+                                           "noise": ("5", "10", "20"),
+                                           "jpeg": ("50", "25", "10"),
+                                           "occl": ("10", "20", "30")}[f]]
+    deg_methods = [m for m in order if any(k[0] == m for k in per_ds)]
+    deg = {(m, f, lv): float(np.mean([per_ds[(m, d, f, lv)][0] for d in deg_ds]))
+           for m in deg_methods for f, lv in conds}
+    # 95% half-width on each mean, combining per-dataset bootstrap CIs (independence).
+    hw = [1.96 * np.sqrt(sum(((per_ds[(m, d, f, lv)][2] - per_ds[(m, d, f, lv)][1])
+                              / 2 / 1.96) ** 2 for d in deg_ds)) / len(deg_ds)
+          for m in deg_methods for f, lv in conds]
+    with open(os.path.join(TAB, "tab_degradation.tex"), "w") as fh:
+        fh.write("% auto-generated by scripts/make_paper_figures.py\n")
+        fh.write("\\begin{tabularx}{\\fulllength}{lC|CCC|CCC|CCC|CCC}\n\\toprule\n")
+        fh.write("\\textbf{Method} & \\textbf{clean}"
+                 " & \\multicolumn{3}{c|}{\\textbf{blur} $\\sigma$}"
+                 " & \\multicolumn{3}{c|}{\\textbf{noise} $\\sigma$}"
+                 " & \\multicolumn{3}{c|}{\\textbf{JPEG} $q$}"
+                 " & \\multicolumn{3}{c}{\\textbf{occlusion} \\%}\\\\\n")
+        fh.write(" & & " + " & ".join(lv for f, lv in conds[1:]) + "\\\\\n\\midrule\n")
+        for m in deg_methods:
+            nm = disp(m).replace("_", "\\_")
+            bold = "\\textbf{%s}" if m in HI else "%s"
+            cells = " & ".join(f"{deg[(m, f, lv)]:+.2f}" for f, lv in conds)
+            fh.write(f"{bold % nm} & {cells}\\\\\n")
+        fh.write("\\bottomrule\n\\end{tabularx}\n")
+    print(f"  + tab_degradation.tex ({len(deg_methods)} methods; "
+          f"mean-CI half-widths {min(hw):.3f}-{max(hw):.3f})")
 
 print("wrote figures + leaderboard.csv + tab_leaderboard.tex to", PAPER)
 print("single order:", " > ".join(f"{m} {mean_s[m]:.2f}" for m in order[:4]), "...")

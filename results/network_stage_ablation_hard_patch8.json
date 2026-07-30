@@ -1,0 +1,23 @@
+{
+  "backbones": [
+    "vit_base_patch8_224.augreg_in21k_ft_in1k"
+  ],
+  "n_images": 40,
+  "subset": "hard",
+  "results": {
+    "vit_base_patch8_224.augreg_in21k_ft_in1k": {
+      "n_stages": 3,
+      "stage_skills": [
+        0.6708333333333336,
+        0.6583333333333332,
+        0.6499999999999999
+      ],
+      "best_stage": 0,
+      "best_skill": 0.6708333333333336,
+      "best_ci": [
+        0.55,
+        0.7875000000000001
+      ]
+    }
+  }
+}

@@ -17,4 +17,10 @@
 | edgenext_base.in21k_ft_in1k | +0.91 +0.93 +0.91 +0.91 | stage1 | +0.93 [+0.89,+0.96] |
 | edgenext_xx_small.in1k | +0.89 +0.92 +0.89 +0.88 | stage1 | +0.92 [+0.88,+0.95] |
 | vit_base_patch16_224.augreg_in21k_ft_in1k | +0.92 +0.89 +0.89 | stage0 | +0.92 [+0.88,+0.95] |
+| vit_base_patch8_224.augreg_in21k_ft_in1k | +0.92 +0.91 +0.92 | stage0 | +0.92 [+0.89,+0.95] |
 | vit_tiny_patch16_224.augreg_in21k_ft_in1k | +0.86 +0.86 +0.85 | stage0 | +0.86 [+0.79,+0.93] |
+
+vit_base_patch8 row: finer-patch stride control (reviewer-requested), run 2026-07-29 on an
+NVIDIA A100 (GPU) in a clean env (torch 2.8.0+cu128, timm 1.0.19); pipeline validated by
+reproducing the vit_base_patch16 CPU row to within +-0.01 per stage (see
+network_stage_ablation_easy_sanity_b16.md, network_stage_ablation_easy_patch8.md).

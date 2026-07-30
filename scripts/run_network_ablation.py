@@ -28,9 +28,12 @@ from imgsym.evaluation import (extract, perturb_axis, discrimination_skill,
                                load_nyu_single, load_pix2per)
 
 # Exact pretrained tags from the rotation paper's architectures.py.
+# vit_base_patch8 added 2026-07 (reviewer-requested finer-patch control: same AugReg
+# weights family as the two patch-16 ViTs, isolating tokenization stride from hierarchy).
 BACKBONES = [
     "vit_tiny_patch16_224.augreg_in21k_ft_in1k",
     "vit_base_patch16_224.augreg_in21k_ft_in1k",
+    "vit_base_patch8_224.augreg_in21k_ft_in1k",
     "efficientvit_b0.r224_in1k",
     "efficientvit_b3.r224_in1k",
     "convnextv2_atto.fcmae_ft_in1k",
@@ -87,11 +90,11 @@ def make_preproc(name):
             np.array(cfg["std"], np.float32))
 
 
-def forward_stages(model, bgr, size, mean, std):
+def forward_stages(model, bgr, size, mean, std, device="cpu"):
     rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
     r = cv2.resize(rgb, (size, size)).astype(np.float32) / 255.0
     r = (r - mean) / std
-    t = torch.from_numpy(r.transpose(2, 0, 1)).unsqueeze(0)
+    t = torch.from_numpy(r.transpose(2, 0, 1)).unsqueeze(0).to(device)
     with torch.no_grad():
         fs = model(t)
     return [f.squeeze(0).abs().cpu().numpy() for f in fs]
@@ -101,20 +104,20 @@ def cmp_stage(a, b):
     return float(1.0 - np.sum(np.abs(a - b)) / (np.sum(np.maximum(a, b)) + 1e-8))
 
 
-def score_backbone(name, cache):
-    model = timm.create_model(name, pretrained=True, features_only=True).eval()
+def score_backbone(name, cache, device="cpu"):
+    model = timm.create_model(name, pretrained=True, features_only=True).eval().to(device)
     size, mean, std = make_preproc(name)
     per_stage = None
     for true_sub, wsubs in cache:
-        tf = forward_stages(model, true_sub, size, mean, std)
-        tff = forward_stages(model, np.fliplr(true_sub), size, mean, std)
+        tf = forward_stages(model, true_sub, size, mean, std, device)
+        tff = forward_stages(model, np.fliplr(true_sub), size, mean, std, device)
         t_scores = [cmp_stage(a, b) for a, b in zip(tf, tff)]
         if per_stage is None:
             per_stage = [[] for _ in range(len(t_scores))]
         w_by_stage = [[] for _ in range(len(t_scores))]
         for ws in wsubs:
-            wf = forward_stages(model, ws, size, mean, std)
-            wff = forward_stages(model, np.fliplr(ws), size, mean, std)
+            wf = forward_stages(model, ws, size, mean, std, device)
+            wff = forward_stages(model, np.fliplr(ws), size, mean, std, device)
             for si, (a, b) in enumerate(zip(wf, wff)):
                 w_by_stage[si].append(cmp_stage(a, b))
         for si in range(len(t_scores)):
@@ -133,18 +136,24 @@ def main():
     ap.add_argument("--limit", type=int, default=40, help="images per dataset")
     ap.add_argument("--subset", choices=["easy", "hard"], default="easy",
                     help="easy=NYU+symComp17 (stage profiling); hard=PIX2PER-art (ranking)")
+    ap.add_argument("--device", default="cpu", help="torch device (cpu or cuda)")
+    ap.add_argument("--only", default="",
+                    help="comma-separated backbone tags: run only these (default all)")
+    ap.add_argument("--out-suffix", default="",
+                    help="append to output basename (avoids clobbering full-pool results)")
     args = ap.parse_args()
-    out_base = f"results/network_stage_ablation_{args.subset}"
+    out_base = f"results/network_stage_ablation_{args.subset}{args.out_suffix}"
 
     print(f"building subimage cache ({args.subset})...", flush=True)
     cache = build_subimage_cache(args.limit, args.subset)
     print(f"cache: {len(cache)} images\n", flush=True)
 
+    pool = [b for b in args.only.split(",") if b] or BACKBONES
     results = {}
-    for name in BACKBONES:
+    for name in pool:
         t0 = time.time()
         try:
-            results[name] = score_backbone(name, cache)
+            results[name] = score_backbone(name, cache, args.device)
             v = results[name]
             print(f"[{name}] stages={v['n_stages']} "
                   f"skills={[round(s, 2) for s in v['stage_skills']]} "
@@ -157,7 +166,7 @@ def main():
 
     os.makedirs("results", exist_ok=True)
     with open(out_base + ".json", "w") as fh:
-        json.dump({"backbones": BACKBONES, "n_images": len(cache), "subset": args.subset,
+        json.dump({"backbones": pool, "n_images": len(cache), "subset": args.subset,
                    "results": results}, fh, indent=2)
 
     ok = {k: v for k, v in results.items() if "stage_skills" in v}

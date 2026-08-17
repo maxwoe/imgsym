@@ -1,5 +1,9 @@
 # imgsym
 
+[![Paper](https://img.shields.io/badge/Paper-Symmetry%202026-004B87?logo=doi&logoColor=white)](https://doi.org/10.3390/sym18081355)
+[![PyPI](https://img.shields.io/pypi/v/imgsym?logo=pypi&logoColor=white)](https://pypi.org/project/imgsym/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](https://github.com/maxwoe/imgsym/blob/main/LICENSE)
+
 Detect symmetry axes in images and score mirror symmetry along them.
 **imgsym** implements multiple algorithms from symmetry research — 4
 **detectors** and 13 **scorers** — behind one small API, and benchmarks them
@@ -148,8 +152,32 @@ python scripts/run_discrimination.py                    # single-axis protocol
 python scripts/run_discrimination.py --protocol multi   # multi-axis protocol
 ```
 
-The full protocol and analysis are described in the accompanying paper.
+The full protocol and analysis are described in the accompanying
+[paper](https://doi.org/10.3390/sym18081355).
 
 ## License
 
 MIT — see [LICENSE](https://github.com/maxwoe/imgsym/blob/main/LICENSE).
+
+## Citation
+
+If you use imgsym or the benchmark in your research, please cite:
+
+> Woehrer, M. Classical Versus Deep Mirror-Symmetry Scoring: A Benchmark of
+> Thirteen Methods. *Symmetry* **2026**, *18*, 1355.
+> [doi:10.3390/sym18081355](https://doi.org/10.3390/sym18081355)
+
+```bibtex
+@Article{sym18081355,
+  author       = {Woehrer, Maximilian},
+  title        = {Classical Versus Deep Mirror-Symmetry Scoring: A Benchmark of Thirteen Methods},
+  journal      = {Symmetry},
+  volume       = {18},
+  year         = {2026},
+  number       = {8},
+  article-number = {1355},
+  url          = {https://www.mdpi.com/2073-8994/18/8/1355},
+  issn         = {2073-8994},
+  doi          = {10.3390/sym18081355}
+}
+```
